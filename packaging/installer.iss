@@ -28,7 +28,7 @@ VersionInfoVersion={#AppVersion}
 VersionInfoProductName=CuteTube
 VersionInfoDescription=CuteTube Setup
 DefaultDirName={autopf}\CuteTube
-DefaultGroupName=CuteTube
+DisableDirPage=auto
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
@@ -60,7 +60,7 @@ Source: "..\legal\THIRD-PARTY-NOTICES.md"; DestDir: "{app}\legal"; Flags: ignore
 Source: "..\LICENSE"; DestDir: "{app}\legal"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\CuteTube"; Filename: "{app}\CuteTube.exe"; AppUserModelID: "Cutetube.App"
+Name: "{autoprograms}\CuteTube"; Filename: "{app}\CuteTube.exe"; AppUserModelID: "Cutetube.App"
 Name: "{autodesktop}\CuteTube"; Filename: "{app}\CuteTube.exe"; Tasks: desktopicon; AppUserModelID: "Cutetube.App"
 
 [Run]
