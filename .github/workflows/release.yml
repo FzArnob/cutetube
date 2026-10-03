@@ -1,0 +1,151 @@
+# Builds the Windows installer on GitHub's servers from the tagged source and publishes it as a GitHub Release.
+# Release: bump __version__ in app/__init__.py, commit, then `git tag v1.2.3 && git push --tags`.
+#
+# Code signing (SignPath Foundation, free for open source): once the project is approved, set the repository
+# variables SIGNPATH_ORGANIZATION_ID, SIGNPATH_PROJECT_SLUG, SIGNPATH_POLICY_SLUG and the secret SIGNPATH_API_TOKEN.
+# The app and the installer are then signed automatically. Without them, the release is built unsigned.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to (re)build, e.g. v0.1.0'
+        required: true
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+      SIGN: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Check version
+        shell: pwsh
+        run: |
+          $v = (Select-String -Path app\__init__.py -Pattern '__version__ = "(.+)"').Matches[0].Groups[1].Value
+          if ("v$v" -ne $env:TAG) { throw "Tag $env:TAG doesn't match app version $v (app/__init__.py)" }
+          "VERSION=$v" >> $env:GITHUB_ENV
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+          cache: pip
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install build tools
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pyinstaller
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
+
+      - name: Build app
+        shell: pwsh
+        run: packaging\build.ps1 -Step app
+
+      # --- signing the app (SignPath) ---
+      - name: Upload unsigned app
+        if: env.SIGN == 'true'
+        id: app-unsigned
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-unsigned
+          path: build/app/CuteTube
+      - name: Sign app
+        if: env.SIGN == 'true'
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
+          artifact-configuration-slug: app
+          github-artifact-id: ${{ steps.app-unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: build/app-signed
+      - name: Use signed app
+        if: env.SIGN == 'true'
+        shell: pwsh
+        run: |
+          Remove-Item -Recurse -Force build\app\CuteTube
+          Move-Item build\app-signed build\app\CuteTube
+
+      - name: Build installer
+        shell: pwsh
+        run: packaging\build.ps1 -Step installer -RepoUrl "https://github.com/${{ github.repository }}"
+
+      # --- signing the installer (SignPath) ---
+      - name: Upload unsigned installer
+        if: env.SIGN == 'true'
+        id: setup-unsigned
+        uses: actions/upload-artifact@v7
+        with:
+          name: setup-unsigned
+          path: dist/CuteTube-Setup.exe
+      - name: Sign installer
+        if: env.SIGN == 'true'
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
+          artifact-configuration-slug: installer
+          github-artifact-id: ${{ steps.setup-unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: dist/signed
+      - name: Use signed installer
+        if: env.SIGN == 'true'
+        shell: pwsh
+        run: Move-Item -Force dist\signed\CuteTube-Setup.exe dist\CuteTube-Setup.exe
+
+      - name: Checksum
+        shell: pwsh
+        run: |
+          $h = (Get-FileHash dist\CuteTube-Setup.exe -Algorithm SHA256).Hash.ToLower()
+          "$h  CuteTube-Setup.exe" | Set-Content -Encoding ascii dist\CuteTube-Setup.exe.sha256
+          "SHA256=$h" >> $env:GITHUB_ENV
+
+      - name: Publish release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $signed = if ($env:SIGN -eq 'true') { 'Signed by SignPath Foundation.' } else { 'This build is not code-signed yet: Windows may show "Unknown publisher" or SmartScreen. Choose **More info → Run anyway**.' }
+          @"
+          ## Install
+
+          Download **CuteTube-Setup.exe** below and run it. Windows 10 (1809 or newer) or Windows 11, 64-bit.
+
+          $signed
+
+          SHA-256: ``$env:SHA256``
+
+          By installing you agree to the [Terms of Use](https://github.com/${{ github.repository }}/blob/$env:TAG/legal/TERMS.md) and the [Privacy Policy](https://github.com/${{ github.repository }}/blob/$env:TAG/legal/PRIVACY.md).
+          "@ | Set-Content -Encoding utf8 notes.md
+          gh release view $env:TAG *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $env:TAG dist\CuteTube-Setup.exe dist\CuteTube-Setup.exe.sha256 --clobber
+            gh release edit $env:TAG --notes-file notes.md
+          } else {
+            gh release create $env:TAG dist\CuteTube-Setup.exe dist\CuteTube-Setup.exe.sha256 --title "CuteTube $env:VERSION" --notes-file notes.md
+          }

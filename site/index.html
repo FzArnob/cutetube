@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CuteTube</title>
+  <meta name="description" content="Free Windows app to browse YouTube, Instagram, Facebook and TikTok without ads, and save the videos and photos you want. Open source, no tracking.">
+  <link rel="icon" href="icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top"><div class="wrap">
+    <a class="brand" href="./"><img src="icon.png" alt=""><span><span class="cute">cute</span>tube</span></a>
+    <nav><a href="#features">Features</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a class="hide-sm" href="{{repo}}">GitHub</a></nav>
+  </div></header>
+
+  <main>
+    <div class="wrap hero" id="download">
+      <img class="logo" src="icon.png" alt="CuteTube logo">
+      <h1>Save it. Keep it.<br><em>Skip the ads.</em></h1>
+      <p class="lead">Browse YouTube, Instagram, Facebook and TikTok without ads, and save the videos and photos you want to your PC.</p>
+      <div class="cta">
+        <a class="btn" href="{{repo}}/releases/latest/download/CuteTube-Setup.exe">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          Download for Windows
+        </a>
+        <div class="meta">Version {{version}} · Windows 10 &amp; 11 (64-bit) · Free and open source</div>
+        <div class="agree">By downloading or installing you agree to the <a href="terms.html">Terms of Use</a> and the <a href="privacy.html">Privacy Policy</a>.</div>
+      </div>
+    </div>
+
+    <section id="features"><div class="wrap">
+      <h2>Everything in one window</h2>
+      <p class="sub">The real sites, inside the app, with a panel that knows what you're looking at.</p>
+      <div class="grid">
+        <div class="card"><span class="ic">🎬</span><h3>YouTube without ads</h3><p>Videos, Shorts, playlists and whole channels. Pick a quality from 8K down to audio only.</p></div>
+        <div class="card"><span class="ic">📸</span><h3>Instagram, Facebook &amp; TikTok</h3><p>Save posts, reels and albums you can see while signed in, with photos and videos kept in full quality.</p></div>
+        <div class="card"><span class="ic">✅</span><h3>Select mode</h3><p>Turn on Select, tick what you want while you scroll, then download it all at once.</p></div>
+        <div class="card"><span class="ic">⏯️</span><h3>A queue that keeps going</h3><p>Pause, resume and retry. Downloads continue where they stopped, even after a restart.</p></div>
+        <div class="card"><span class="ic">🗂️</span><h3>Tidy folders</h3><p>Files are sorted by channel or account, with titles, thumbnails and chapters embedded.</p></div>
+        <div class="card"><span class="ic">🔄</span><h3>Keeps working</h3><p>When a site changes, CuteTube fetches the updated downloaders (yt-dlp, gallery-dl) by itself.</p></div>
+      </div>
+    </div></section>
+
+    <section id="privacy"><div class="wrap">
+      <h2>Private by design</h2>
+      <p class="sub">No account, no analytics, no tracking. Your sign-ins and history stay on your PC.</p>
+      <div class="grid">
+        <div class="card"><h3>Nothing collected</h3><p>CuteTube has no servers. The developers never see your data. Read the <a href="privacy.html">Privacy Policy</a>.</p></div>
+        <div class="card"><h3>Open source</h3><p>Every line is public on <a href="{{repo}}">GitHub</a> under GPL-2.0, and each installer is built by GitHub from that code.</p></div>
+        <div class="card"><h3>You stay in control</h3><p>Uninstalling offers to remove all app data and sign-ins. Your downloaded files are never touched.</p></div>
+      </div>
+    </div></section>
+
+    <section id="install"><div class="wrap">
+      <h2>Install</h2>
+      <ol class="steps">
+        <li><b>Download</b> <code>CuteTube-Setup.exe</code> with the button above.</li>
+        <li><b>Run it</b> and accept the Terms of Use and Privacy Policy. It installs for your user account, so no administrator rights are needed.</li>
+        <li><b>Open CuteTube</b> from the Start menu, sign in to the sites you use, and start saving.</li>
+      </ol>
+      <p class="note">If Windows SmartScreen shows <i>“Windows protected your PC”</i>, that's because the release is new and has few downloads so far. Check that the publisher and file come from this site, then choose <b>More info → Run anyway</b>. You can compare the file's SHA-256 checksum with the one on the <a href="{{repo}}/releases/latest">release page</a>.</p>
+    </div></section>
+
+    <section id="code-signing"><div class="wrap">
+      <h2>Code signing policy</h2>
+      <p class="sub">Free code signing provided by <a href="https://about.signpath.io/">SignPath.io</a>, certificate by <a href="https://signpath.org/">SignPath Foundation</a>.</p>
+      <div class="grid">
+        <div class="card"><h3>What gets signed</h3><p>Only CuteTube's own program files and installer, built by GitHub Actions directly from this repository's source code.</p></div>
+        <div class="card"><h3>Team roles</h3><p>Committers and reviewers: <a href="https://github.com/FzArnob">FzArnob</a>. Approvers: <a href="https://github.com/FzArnob">FzArnob</a>. Each release is approved by hand before it's signed.</p></div>
+        <div class="card"><h3>Privacy</h3><p>This program doesn't send any information to other networked systems unless the user asks it to, apart from the update and filter-list checks described in the <a href="privacy.html">Privacy Policy</a>.</p></div>
+      </div>
+    </div></section>
+  </main>
+
+  <footer><div class="wrap">
+    <div class="links"><a href="terms.html">Terms of Use</a><a href="privacy.html">Privacy Policy</a><a href="notices.html">Third-party notices</a><a href="{{repo}}">Source code</a><a href="{{repo}}/issues">Support</a></div>
+    CuteTube is an independent open-source project, not affiliated with Google, YouTube, Meta, Instagram, Facebook or TikTok. Their names are trademarks of their owners. Only download content you have the right to.
+  </div></footer>
+</body>
+</html>
